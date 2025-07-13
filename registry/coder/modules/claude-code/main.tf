@@ -90,6 +90,13 @@ variable "experiment_post_install_script" {
   default     = null
 }
 
+variable "subdomain" {
+  type        = bool
+  description = <<-EOT
+    Determines whether the app will be accessed via its own subdomain or via a path on Coder. If wildcards are not setup by the administrator then apps with "subdomain" set to true will not be accessible.
+  EOT
+  default     = true
+}
 
 variable "install_agentapi" {
   type        = bool
@@ -113,6 +120,7 @@ locals {
   agentapi_wait_for_start_script_b64 = base64encode(file("${path.module}/scripts/agentapi-wait-for-start.sh"))
   remove_last_session_id_script_b64  = base64encode(file("${path.module}/scripts/remove-last-session-id.js"))
   claude_code_app_slug               = "ccw"
+  chat_base_path = var.subdomain ? "/chat" : format("/@%s/%s/apps/%s/chat", data.coder_workspace_owner.me.name, data.coder_workspace.me.name, local.claude_code_app_slug)
 }
 
 # Install and Initialize Claude Code
@@ -241,7 +249,7 @@ resource "coder_script" "claude_code" {
     export LC_ALL=en_US.UTF-8
 
     cd "${local.workdir}"
-    nohup "$module_path/scripts/agentapi-start.sh" use_prompt &> "$module_path/agentapi-start.log" &
+    nohup "$module_path/scripts/agentapi-start.sh" use_prompt "${local.chat_base_path}" &> "$module_path/agentapi-start.log" &
     "$module_path/scripts/agentapi-wait-for-start.sh"
     EOT
   run_on_start = true
@@ -256,7 +264,7 @@ resource "coder_app" "claude_code_web" {
   icon         = var.icon
   order        = var.order
   group        = var.group
-  subdomain    = true
+  subdomain    = var.subdomain
   healthcheck {
     url       = "http://localhost:3284/status"
     interval  = 3

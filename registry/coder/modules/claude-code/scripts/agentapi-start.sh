@@ -14,6 +14,9 @@ else
     rm -f /tmp/claude-code-prompt
 fi
 
+# Accept chat-base-path as the second argument
+CHAT_BASE_PATH="$2"
+
 # if the log file already exists, archive it
 if [ -f "$log_file_path" ]; then
     mv "$log_file_path" "$log_file_path"".$(date +%s)"
@@ -30,10 +33,14 @@ set +o errexit
 function start_agentapi() {
     local continue_flag="$1"
     local prompt_subshell='"$(cat /tmp/claude-code-prompt)"'
-    
+
     # use low width to fit in the tasks UI sidebar. height is adjusted so that width x height ~= 80x1000 characters
     # visible in the terminal screen by default.
-    agentapi server --term-width 67 --term-height 1190 -- \
+    local chat_base=""
+    if [ -n "$CHAT_BASE_PATH" ]; then
+        chat_base="--chat-base-path $CHAT_BASE_PATH"
+    fi
+    agentapi server $chat_base --term-width 67 --term-height 1190 -- \
         bash -c "claude $continue_flag --dangerously-skip-permissions $prompt_subshell" \
         > "$log_file_path" 2>&1
 }
