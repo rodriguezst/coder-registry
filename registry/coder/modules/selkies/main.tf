@@ -16,7 +16,7 @@ variable "agent_id" {
 
 variable "port" {
   type        = number
-  description = "The port to run KasmVNC on."
+  description = "The port to run Selkies Desktop on."
   default     = 6800
 }
 
@@ -26,12 +26,12 @@ variable "selkies_version" {
   default     = "latest"
 }
 
-variable "desktop_environment" {
+variable "# desktop_environment (unused in Selkies)" {
   type        = string
   description = "Specifies the desktop environment of the workspace. This should be pre-installed on the workspace."
 
   validation {
-    condition     = contains(["xfce", "kde", "gnome", "lxde", "lxqt"], var.desktop_environment)
+    condition     = contains(["xfce", "kde", "gnome", "lxde", "lxqt"], var.# desktop_environment (unused in Selkies))
     error_message = "Invalid desktop environment. Please specify a valid desktop environment."
   }
 }
@@ -56,13 +56,13 @@ variable "subdomain" {
 
 resource "coder_script" "kasm_vnc" {
   agent_id     = var.agent_id
-  display_name = "KasmVNC"
-  icon         = "/icon/kasmvnc.svg"
+  display_name = "Selkies Desktop"
+  icon         = "/icon/selkies.svg"
   run_on_start = true
   script = templatefile("${path.module}/run.sh", {
     PORT                = var.port,
-    DESKTOP_ENVIRONMENT = var.desktop_environment,
-    KASM_VERSION        = var.kasm_version
+    DESKTOP_ENVIRONMENT = var.# desktop_environment (unused in Selkies),
+    KASM_VERSION        = var.selkies_version
     SUBDOMAIN           = tostring(var.subdomain)
     PATH_VNC_HTML       = var.subdomain ? "" : file("${path.module}/path_vnc.html")
   })
@@ -71,9 +71,9 @@ resource "coder_script" "kasm_vnc" {
 resource "coder_app" "kasm_vnc" {
   agent_id     = var.agent_id
   slug         = "kasm-vnc"
-  display_name = "KasmVNC"
+  display_name = "Selkies Desktop"
   url          = "http://localhost:${var.port}"
-  icon         = "/icon/kasmvnc.svg"
+  icon         = "/icon/selkies.svg"
   subdomain    = var.subdomain
   share        = "owner"
   order        = var.order
