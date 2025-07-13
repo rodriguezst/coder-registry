@@ -1,6 +1,5 @@
 terraform {
   required_version = ">= 1.0"
-
   required_providers {
     coder = {
       source  = "coder/coder"
@@ -26,16 +25,6 @@ variable "selkies_version" {
   default     = "latest"
 }
 
-variable "# desktop_environment (unused in Selkies)" {
-  type        = string
-  description = "Specifies the desktop environment of the workspace. This should be pre-installed on the workspace."
-
-  validation {
-    condition     = contains(["xfce", "kde", "gnome", "lxde", "lxqt"], var.# desktop_environment (unused in Selkies))
-    error_message = "Invalid desktop environment. Please specify a valid desktop environment."
-  }
-}
-
 variable "order" {
   type        = number
   description = "The order determines the position of app in the UI presentation. The lowest order is shown first and apps with equal order are sorted by name (ascending order)."
@@ -54,33 +43,32 @@ variable "subdomain" {
   description = "Is subdomain sharing enabled in your cluster?"
 }
 
-resource "coder_script" "kasm_vnc" {
+resource "coder_script" "selkies_desktop" {
   agent_id     = var.agent_id
   display_name = "Selkies Desktop"
-  icon         = "/icon/selkies.svg"
+  icon         = "/icon/vnc.svg"
   run_on_start = true
   script = templatefile("${path.module}/run.sh", {
-    PORT                = var.port,
-    DESKTOP_ENVIRONMENT = var.# desktop_environment (unused in Selkies),
-    KASM_VERSION        = var.selkies_version
-    SUBDOMAIN           = tostring(var.subdomain)
-    PATH_VNC_HTML       = var.subdomain ? "" : file("${path.module}/path_vnc.html")
+    PORT            = var.port
+    SELKIES_VERSION = var.selkies_version
+    SUBDOMAIN       = tostring(var.subdomain)
+    PATH_VNC_HTML   = var.subdomain ? "" : file("${path.module}/path_vnc.html")
   })
 }
 
-resource "coder_app" "kasm_vnc" {
+resource "coder_app" "selkies_desktop" {
   agent_id     = var.agent_id
-  slug         = "kasm-vnc"
+  slug         = "selkies-desktop"
   display_name = "Selkies Desktop"
   url          = "http://localhost:${var.port}"
-  icon         = "/icon/selkies.svg"
+  icon         = "/icon/vnc.svg"
   subdomain    = var.subdomain
   share        = "owner"
   order        = var.order
   group        = var.group
 
   healthcheck {
-    url       = "http://localhost:${var.port}/app"
+    url       = "http://localhost:${var.port}/"
     interval  = 5
     threshold = 5
   }
