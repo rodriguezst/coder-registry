@@ -6,6 +6,9 @@ error() { printf "💀 ERROR: %s\n" "$@"; exit 1; }
 : "${PORT?Must set PORT}"    # Port for web UI
 : "${SELKIES_VERSION:=latest}"
 
+# Injected by Terraform - path sharing bounce html content
+PATH_VNC_HTML='${PATH_VNC_HTML}'
+
 SELKIES_DIR="/opt/selkies-gstreamer-$SELKIES_VERSION"
 if [[ ! -d "$SELKIES_DIR" ]]; then
   apt-get update -yq && apt-get install -yq --no-install-recommends \

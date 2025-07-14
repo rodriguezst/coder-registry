@@ -43,6 +43,10 @@ variable "subdomain" {
   description = "Is subdomain sharing enabled in your cluster?"
 }
 
+locals {
+  path_vnc_html_content = var.subdomain ? "" : file("${path.module}/path_vnc.html")
+}
+
 resource "coder_script" "selkies_desktop" {
   agent_id     = var.agent_id
   display_name = "Selkies Desktop"
@@ -52,7 +56,7 @@ resource "coder_script" "selkies_desktop" {
     PORT            = var.port
     SELKIES_VERSION = var.selkies_version
     SUBDOMAIN       = tostring(var.subdomain)
-    PATH_VNC_HTML   = var.subdomain ? "" : file("${path.module}/path_vnc.html")
+    PATH_VNC_HTML   = local.path_vnc_html_content
   })
 }
 
