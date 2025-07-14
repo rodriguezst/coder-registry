@@ -3,8 +3,8 @@ set -euo pipefail
 
 error() { printf "💀 ERROR: %s\n" "$@"; exit 1; }
 
-: "${PORT?Must set PORT}"    # Port for web UI
-: "${SELKIES_VERSION:=latest}"
+: "\${PORT?Must set PORT}"    # Port for web UI
+: "\${SELKIES_VERSION:=latest}"
 
 
 SELKIES_DIR="/opt/selkies-gstreamer-$SELKIES_VERSION"
