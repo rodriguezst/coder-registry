@@ -37,15 +37,7 @@ variable "group" {
   default     = null
 }
 
-variable "subdomain" {
-  type        = bool
-  default     = true
-  description = "Is subdomain sharing enabled in your cluster?"
-}
 
-locals {
-  path_vnc_html_content = var.subdomain ? "" : file("${path.module}/path_vnc.html")
-}
 
 resource "coder_script" "selkies_desktop" {
   agent_id     = var.agent_id
@@ -55,8 +47,6 @@ resource "coder_script" "selkies_desktop" {
   script = templatefile("${path.module}/run.sh", {
     PORT            = var.port
     SELKIES_VERSION = var.selkies_version
-    SUBDOMAIN       = tostring(var.subdomain)
-    PATH_VNC_HTML   = local.path_vnc_html_content
   })
 }
 
@@ -66,7 +56,6 @@ resource "coder_app" "selkies_desktop" {
   display_name = "Selkies Desktop"
   url          = "http://localhost:${var.port}"
   icon         = "/icon/vnc.svg"
-  subdomain    = var.subdomain
   share        = "owner"
   order        = var.order
   group        = var.group
